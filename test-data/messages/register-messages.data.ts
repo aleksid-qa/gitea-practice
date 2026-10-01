@@ -1,6 +1,5 @@
 export const RegisterMessages = {
     SUCCESS: 'Account was successfully created. Welcome!',
-    EMPTY_FIELD: 'Please fill out this field.',
     EMAIL_TAKEN: 'The email address is already used.',
     EMAIL_INVALID: (email: string) => `Please include an '@' in the email address. '${email}' is missing an '@'.`,
     EMAIL_MISSING_AT_SIGN: (email: string) => `Please enter a part following '@'. '${email}' is incomplete.`,

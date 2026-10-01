@@ -11,4 +11,8 @@ export default class Dashboard extends BasePage {
     public readonly searchReposInput: Locator = this.page.locator('[type="search"]');
     public readonly repositoryList: Locator = this.page.locator('.repo-owner-name-list');
     public readonly repositoryListItems: Locator = this.page.locator('.repo-owner-name-list>li');
+    public readonly repositoryListFirstItem: Locator = this.page.locator('.repo-owner-name-list>li').first();
+    public readonly profileAndSettingsButton: Locator = this.page.locator('[data-tooltip-content="Profile and Settings…"]');
+    public readonly userProfileOption: Locator = this.page.locator('.user-menu>a', { hasText: 'Profile' });
+    public readonly userSettingsOption: Locator = this.page.locator('.user-menu>a', { hasText: 'Settings' });
 }

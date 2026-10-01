@@ -5,8 +5,6 @@ import BasePage from "../pom/BasePage.page";
 import Dashboard from "../pom/pages/Dashboard.page";
 import { RegisterMessages } from "../test-data/messages/register-messages.data";
 
-
-
 test.describe("Registration flows", () => {
     let registerPage: RegisterPage;
     let basePage: BasePage;
@@ -27,8 +25,7 @@ test.describe("Registration flows", () => {
 
     test("Empty username", async ({ page }) => {
         await registerPage.register('', validRegisterData.email, validRegisterData.password, validRegisterData.password);
-        await expect(registerPage.usernameInput).toHaveJSProperty('validity.valueMissing', true);
-        await expect(registerPage.usernameInput).toHaveJSProperty('validationMessage', RegisterMessages.EMPTY_FIELD);
+        await registerPage.validateEmptyMessage(registerPage.usernameInput);
         await expect(page).toHaveURL(registerPage.url);
     })
 
@@ -48,8 +45,7 @@ test.describe("Registration flows", () => {
 
     test("Empty email", async ({ page }) => {
         await registerPage.register(validRegisterData.username, '', validRegisterData.password, validRegisterData.password);
-        await expect(registerPage.emailInput).toHaveJSProperty('validity.valueMissing', true);
-        await expect(registerPage.emailInput).toHaveJSProperty('validationMessage', RegisterMessages.EMPTY_FIELD);
+        await registerPage.validateEmptyMessage(registerPage.emailInput);
         await expect(page).toHaveURL(registerPage.url);
     })
 
@@ -77,17 +73,16 @@ test.describe("Registration flows", () => {
 
     test("Empty password", async ({ page }) => {
         await registerPage.register(validRegisterData.username, validRegisterData.email, '', validRegisterData.password);
-        await expect(registerPage.passwordInput).toHaveJSProperty('validity.valueMissing', true);
-        await expect(registerPage.passwordInput).toHaveJSProperty('validationMessage', 'Please fill out this field.');
+        await registerPage.validateEmptyMessage(registerPage.passwordInput);
         await expect(page).toHaveURL(registerPage.url);
     })
 
     test("Empty confirm password", async ({ page }) => {
         await registerPage.register(validRegisterData.username, validRegisterData.email, validRegisterData.password, '');
-        await expect(registerPage.confirmPasswordInput).toHaveJSProperty('validity.valueMissing', true);
-        await expect(registerPage.confirmPasswordInput).toHaveJSProperty('validationMessage', 'Please fill out this field.');
+        await registerPage.validateEmptyMessage(registerPage.confirmPasswordInput);
         await expect(page).toHaveURL(registerPage.url);
     })
+
     test("Non-matching passwords", async ({ page }) => {
         await registerPage.register(validRegisterData.username, validRegisterData.email, validRegisterData.password, invalidRegisterData.nonMatchingPassword);
         await expect(registerPage.errorPasswordsNotMatch).toBeVisible();

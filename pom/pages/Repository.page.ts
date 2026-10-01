@@ -6,7 +6,7 @@ import Dashboard from "./Dashboard.page";
 import { alreadyRegisteredData } from "../../test-data/register.data";
 
 export default class Repository extends BasePage {
-    public readonly repositoryCloneUrlInput: Locator = this.page.locator('.repo-clone-url');
+    public readonly repositoryName: Locator = this.page.locator('.flex-text-block.tw-flex-wrap.tw-text-18>a').last();
     public readonly settingsButton: Locator = this.page.locator('[data-text="Settings"]');
     public readonly deleteRepositoryButton: Locator = this.page.locator('[data-modal="#delete-repo-modal"]', { hasText: "Delete This Repository" });
     public readonly deleteRepositoryPopUp: Locator = this.page.locator('#delete-repo-modal');
@@ -14,6 +14,8 @@ export default class Repository extends BasePage {
     public readonly deleteRepositoryPopUpNameInput: Locator = this.page.locator('#_aria_label_input_36');
     public readonly deleteRepositoryConfirmationButton: Locator = this.page.locator('.ok.button', { hasText: "Delete Repository" });
     public readonly repositoryDeletedSuccessMessage: Locator = this.page.locator('.flash-success>div', { hasText: RepositoryMessages.REPOSITORY_DELETED });
+    public readonly repositoryDescriptionInput: Locator = this.page.locator('#description');
+    public readonly repositoryFilesTable: Locator = this.page.locator('#repo-files-table');
 
     async setRepositoryUrl(username: string, name: string) {
         this.url = Urls.REPOSITORY_PAGE(username, name);
@@ -25,7 +27,6 @@ export default class Repository extends BasePage {
 
         await this.settingsButton.click();
         repositoryName = await this.repositoryNameInput.inputValue();
-        console.log(repositoryName);
         await expect(this.page).toHaveURL(`${alreadyRegisteredData.username}/${repositoryName}/settings`);
         await this.deleteRepositoryButton.click();
         await expect(this.deleteRepositoryPopUp).toBeVisible();

@@ -2,20 +2,35 @@ import test, { expect } from "@playwright/test";
 import LoginPage from "../pom/pages/Login.page";
 import BasePage from "../pom/BasePage.page";
 import Dashboard from "../pom/pages/Dashboard.page";
-import { alreadyRegisteredData } from "../test-data/register.data";
 import { Urls } from "../test-data/urls.data";
 import CreateNewRepository from "../pom/pages/CreateNewRepository.page";
-import { existingRepositoryData, validRepositoryData } from "../test-data/repository.data";
 import Repository from "../pom/pages/Repository.page";
 import { toPartialValueRegExp } from "../utils/toPartialValueRegExp";
 import { faker } from "@faker-js/faker";
+import RegisterPage from "../pom/pages/Register.page";
 
 test.describe('Actions with repositories', () => {
     let loginPage: LoginPage;
+    let registerPage: RegisterPage;
     let basePage: BasePage;
     let dashboard: Dashboard;
     let createNewRepository: CreateNewRepository;
     let repository: Repository;
+
+    const testUsername = faker.internet.username();
+    const testUserEmail = faker.internet.email();
+    const testUserPassword = faker.internet.password({ length: 8 });
+
+    test.beforeAll(async ({ browser }) => {
+        const context = await browser.newContext();
+        const page = await context.newPage();
+
+        registerPage = new RegisterPage(page);
+        await registerPage.goto();
+        await registerPage.register(testUsername, testUserEmail, testUserPassword, testUserPassword);
+        await page.close();
+        await context.close();
+    })
 
     test.beforeEach(async ({ page }) => {
         loginPage = new LoginPage(page);
@@ -23,41 +38,95 @@ test.describe('Actions with repositories', () => {
         dashboard = new Dashboard(page);
         repository = new Repository(page);
         createNewRepository = new CreateNewRepository(page);
+
         await loginPage.goto();
-        await loginPage.login(alreadyRegisteredData.email, alreadyRegisteredData.password)
+        await loginPage.login(testUserEmail, testUserPassword)
     })
 
-    test('Create new repository from Header and delete it afterwards', async ({ page }) => {
-        let repositoryName = `${faker.internet.username()}_${Date.now()}`;
+    test('Create new repository with valid name from Header', async ({ page }) => {
+        let repositoryName = `automation_repo_${faker.internet.username()}_${Date.now()}`;
 
         await dashboard.createNewHeaderDropdown.click();
         await dashboard.createNewRepositoryHeaderButton.click();
         await expect(page).toHaveURL(Urls.CREATE_NEW_REPOSITORY_PAGE);
         await createNewRepository.createRepository(repositoryName);
-        await repository.setRepositoryUrl(alreadyRegisteredData.username, repositoryName);
+        await repository.setRepositoryUrl(testUsername, repositoryName);
         await expect(page).toHaveURL(repository.url);
-        await expect(repository.repositoryCloneUrlInput).toHaveValue(toPartialValueRegExp(repositoryName));
-        await repository.deleteRepository();
+        await expect(repository.repositoryName).toContainText(toPartialValueRegExp(repositoryName));
+        //await repository.deleteRepository();  //commented for now to have more test data for isolated tests, will be updated in future 
     })
 
-    test('Create new repository from side menu and delete it afterwards', async ({ page }) => {
+    test('Create new repository with empty repository name from Header', async ({ page }) => {
+        await dashboard.createNewHeaderDropdown.click();
+        await dashboard.createNewRepositoryHeaderButton.click();
+        await expect(page).toHaveURL(Urls.CREATE_NEW_REPOSITORY_PAGE);
+        await createNewRepository.createRepository('');
+        await createNewRepository.validateEmptyMessage(createNewRepository.repositoryNameInput);
+        await expect(page).toHaveURL(Urls.CREATE_NEW_REPOSITORY_PAGE);
+    })
+
+    test('Create new repository with valid name from side menu', async ({ page }) => {
+        let repositoryName = `automation_repo_${faker.internet.username()}_${Date.now()}`;
+
         await dashboard.createNewRepositorySideMenuButton.click();
         await expect(page).toHaveURL(Urls.CREATE_NEW_REPOSITORY_PAGE);
-        await createNewRepository.createRepository(validRepositoryData.repositoryName);
-        await repository.setRepositoryUrl(alreadyRegisteredData.username, validRepositoryData.repositoryName);
+        await createNewRepository.createRepository(repositoryName);
+        await repository.setRepositoryUrl(testUsername, repositoryName);
         await expect(page).toHaveURL(repository.url);
-        await expect(repository.repositoryCloneUrlInput).toHaveValue(toPartialValueRegExp(validRepositoryData.repositoryName));
-        await repository.deleteRepository();
+        await expect(repository.repositoryName).toContainText(toPartialValueRegExp(repositoryName));
+        //await repository.deleteRepository(); //commented for now to have more test data for isolated tests, will be updated in future
+    })
+
+    test('Create new repository with empty repository name from side menu', async ({ page }) => {
+        await dashboard.createNewRepositorySideMenuButton.click();
+        await expect(page).toHaveURL(Urls.CREATE_NEW_REPOSITORY_PAGE);
+        await createNewRepository.createRepository('');
+        await createNewRepository.validateEmptyMessage(createNewRepository.repositoryNameInput);
+        await expect(page).toHaveURL(Urls.CREATE_NEW_REPOSITORY_PAGE);
+    })
+
+    test('Create new repository with description and confirm that description is set', async ({ page }) => {
+        let repositoryName = `automation_repo_${faker.internet.username()}_${Date.now()}`;
+        let repositoryDescription = `Description for ${repositoryName}`;
+
+        await dashboard.createNewHeaderDropdown.click();
+        await dashboard.createNewRepositoryHeaderButton.click();
+        await expect(page).toHaveURL(Urls.CREATE_NEW_REPOSITORY_PAGE);
+        await createNewRepository.repositoryNameInput.fill(repositoryName);
+        await createNewRepository.repositoryDescriptionInput.fill(repositoryDescription);
+        await createNewRepository.createRepository(repositoryName, { description: repositoryDescription });
+        await repository.setRepositoryUrl(testUsername, repositoryName);
+        await expect(page).toHaveURL(repository.url);
+        await expect(repository.repositoryName).toContainText(toPartialValueRegExp(repositoryName)); await repository.settingsButton.click();
+        await expect(repository.repositoryDescriptionInput).toHaveValue(repositoryDescription);
+        //await repository.deleteRepository();  //commented for now to have more test data for isolated tests, will be updated in future
+    })
+
+    test('Create new repository with gitignore and confirm that gitignore is set', async ({ page }) => {
+        let repositoryName = `automation_repo_${faker.internet.username()}_${Date.now()}`;
+        let repositoryDescription = `Description for ${repositoryName}`;
+        let gitignore = 'Android';
+
+        await dashboard.createNewHeaderDropdown.click();
+        await dashboard.createNewRepositoryHeaderButton.click();
+        await expect(page).toHaveURL(Urls.CREATE_NEW_REPOSITORY_PAGE);
+        await createNewRepository.repositoryNameInput.fill(repositoryName);
+        await createNewRepository.repositoryDescriptionInput.fill(repositoryDescription);
+        await createNewRepository.createRepository(repositoryName, { gitignore: gitignore });
+        await repository.setRepositoryUrl(testUsername, repositoryName);
+        await expect(page).toHaveURL(repository.url);
+        await expect(repository.repositoryName).toContainText(toPartialValueRegExp(repositoryName));
+        await expect(repository.repositoryFilesTable).toContainText('.gitignore');
+        //await repository.deleteRepository();  //commented for now to have more test data for isolated tests, will be updated in future
     })
 
     test('Filter repositories by name', async () => {
-        let matchingReposCount: number;
-
+        const firstRepositoryInList = await dashboard.repositoryListFirstItem.textContent() ?? '';
+        const filteredRepository = firstRepositoryInList.trim().split('/').pop()!;
         await expect(dashboard.repositoryList).toBeVisible();
-        matchingReposCount = await dashboard.repositoryListItems.filter({ hasText: existingRepositoryData.repositoryName }).count();
-        await dashboard.searchReposInput.fill(existingRepositoryData.repositoryName);
-        await expect(dashboard.repositoryListItems).toHaveCount(matchingReposCount);
-        await expect(dashboard.repositoryListItems).toContainText(existingRepositoryData.repositoryName)
+        await dashboard.searchReposInput.fill(filteredRepository);
+        await expect(dashboard.repositoryListItems).toHaveCount(1);
+        await expect(dashboard.repositoryListItems).toContainText(filteredRepository)
     })
 
     //afterAll is commented as it requires more work to be working correctly in all cases
@@ -79,5 +148,4 @@ test.describe('Actions with repositories', () => {
     //         }
     //     }
     // })
-
 })
