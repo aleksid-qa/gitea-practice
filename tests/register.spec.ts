@@ -17,10 +17,15 @@ test.describe("Registration flows", () => {
     })
 
     test("Valid registration", async ({ page }) => {
-        await registerPage.register(validRegisterData.username, validRegisterData.email, validRegisterData.password, validRegisterData.password);
-        await expect(page).toHaveURL(dashboard.url);
-        await expect(dashboard.organizationDropdown).toHaveText(validRegisterData.username);
-        await expect(dashboard.accountCreatedSuccessMessage).toBeVisible();
+
+        await test.step("Register with valid data", async () => {
+            await registerPage.register(validRegisterData.username, validRegisterData.email, validRegisterData.password, validRegisterData.password);
+        });
+        await test.step("Verify redirection to dashboard", async () => {
+            await expect(page).toHaveURL(dashboard.url);
+            await expect(dashboard.organizationDropdown).toHaveText(validRegisterData.username);
+            await expect(dashboard.accountCreatedSuccessMessage).toBeVisible();
+        });
     })
 
     test("Empty username", async ({ page }) => {

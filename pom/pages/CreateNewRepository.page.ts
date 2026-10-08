@@ -1,6 +1,7 @@
 import { Locator } from "@playwright/test";
 import BasePage from "../BasePage.page";
 import { Urls } from "../../test-data/urls.data";
+import { step } from "../../utils/decorators/step";
 
 export default class CreateNewRepository extends BasePage {
     public readonly url: string = Urls.CREATE_NEW_REPOSITORY_PAGE;
@@ -11,6 +12,7 @@ export default class CreateNewRepository extends BasePage {
     public readonly repositoryGitignoreDropdown: Locator = this.page.locator('.menu.visible.transition');
     public readonly repositoryGitignoreDropdownItem: Locator = this.page.locator('.menu.visible.transition .item');
 
+    @step('Create repository: {name}')
     async createRepository(name: string, options?: { description?: string, gitignore?: string }) {
         await this.repositoryNameInput.fill(name);
         if (options?.description) {

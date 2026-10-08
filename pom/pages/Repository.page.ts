@@ -4,6 +4,7 @@ import { Urls } from "../../test-data/urls.data";
 import { RepositoryMessages } from "../../test-data/messages/repository-messages.data";
 import Dashboard from "./Dashboard.page";
 import { alreadyRegisteredData } from "../../test-data/register.data";
+import { step } from "../../utils/decorators/step";
 
 export default class Repository extends BasePage {
     public readonly repositoryName: Locator = this.page.locator('.flex-text-block.tw-flex-wrap.tw-text-18>a').last();
@@ -17,10 +18,12 @@ export default class Repository extends BasePage {
     public readonly repositoryDescriptionInput: Locator = this.page.locator('#description');
     public readonly repositoryFilesTable: Locator = this.page.locator('#repo-files-table');
 
+    @step('Set repository URL for {username}/{name}')
     async setRepositoryUrl(username: string, name: string) {
         this.url = Urls.REPOSITORY_PAGE(username, name);
     }
 
+    @step('Delete the current repository')
     async deleteRepository() {
         const dashboard = new Dashboard(this.page);
         let repositoryName: string;
