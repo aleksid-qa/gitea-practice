@@ -2,7 +2,7 @@ import { Locator } from "@playwright/test";
 import BasePage from "../BasePage.page";
 import { RegisterMessages } from "../../test-data/messages/register-messages.data";
 
-export default class Dashboard extends BasePage {
+export default class DashboardPage extends BasePage {
     public readonly organizationDropdown: Locator = this.page.locator('.gt-ellipsis').first();
     public readonly accountCreatedSuccessMessage: Locator = this.page.locator('.ui.positive.message', { hasText: RegisterMessages.SUCCESS });
     public readonly createNewHeaderDropdown: Locator = this.page.locator('.ui.dropdown.jump[data-tooltip-content="Create…"]');

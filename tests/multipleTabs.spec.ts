@@ -1,14 +1,14 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from '../utils/fixtures/app';
 
-test('multiple tabs test', async ({ page, context }) => {
+test('multiple tabs test', async ({ app, context }) => {
     const helpPagePromise = context.waitForEvent('page');
 
-    await page.goto('/');
-    await page.getByText('Help').click();
+    await app.page.goto('/');
+    await app.page.getByText('Help').click();
     const helpPage = await helpPagePromise;
     await expect(helpPage.locator('h1', { hasText: 'What is Gitea' })).toBeVisible();
-    await page.bringToFront();
-    await page.waitForTimeout(2000);
+    await app.page.bringToFront();
+    await app.page.waitForTimeout(2000);
     await helpPage.bringToFront();
     await helpPage.waitForTimeout(2000);
 });
